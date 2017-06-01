@@ -24,9 +24,13 @@ class MarkovChainEnglishWordFinder {
       if (typeof wordTransform === 'function') {
         transformedWord = wordTransform(word);
       }
+
       return [
         transformedWord,
-        this.chain.likelihoodOf(word.split(''))
+        this.chain.likelihoodOf(
+          word.split(''),
+          { includeBeginState: false, includeEndState: false}
+        )
       ];
     });
     // sort probabilities numerically
