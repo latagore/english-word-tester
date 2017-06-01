@@ -17,10 +17,9 @@ let rl = readline.createInterface({
 
 
 class MarkovChainEnglishWordFinder {
-  constructor(corpus, wordTransform) {
-    // don't apply any transforms if wordtr
+  constructor(corpus, wordTransform, stateSize = 2) {
     this.wordTransform = wordTransform;
-    this.chain = new Chain(corpus, {stateSize: 2});
+    this.chain = new Chain(corpus, {stateSize});
   }
   
   findLikelyEnglishWords(number, numberOfResults = 10) {
@@ -31,13 +30,57 @@ class MarkovChainEnglishWordFinder {
       }
 
       return [
-        transformedWord,
+        word,
         this.chain.likelihoodOf(
+          transformedWord.split(''),
+          { includeBeginState: true, includeEndState: true }
+        )
+      ];
+    });
+    // sort probabilities numerically
+    results.sort(function(a, b) {
+      return b[1] - a[1];
+    });
+    
+    // return top `numberOfResults` results
+    return results.slice(0, numberOfResults);
+  }
+}
+
+class MarkovChainSyllablesEnglishWordFinder {
+  constructor(corpus, syllableCorpus, { lettersStateSize = 2, syllablesStateSize = 1} = { lettersStateSize: 2, syllablesStateSize: 1}) {
+    console.log(lettersStateSize);
+    this.wordChain = new Chain(corpus, {lettersStateSize});
+    this.syllableChain = new Chain(syllableCorpus, {syllablesStateSize});
+  }
+  
+  findLikelyEnglishWords(number, numberOfResults = 10) {
+    let numberWords = Utils.generateNumberWords(number);
+    let letterResults = numberWords.map(word => {
+      return [
+        word,
+        this.wordChain.likelihoodOf(
           word.split(''),
           { includeBeginState: true, includeEndState: true }
         )
       ];
     });
+    
+    let syllableResults = numberWords.map(word => {
+      return [
+        word,
+        this.syllableChain.likelihoodOf(
+          metaphone.process(word).split(''),
+          { includeBeginState: true, includeEndState: true }
+        )
+      ];
+    });
+    
+    let results = letterResults.map (([word, letterProbability], i) => {
+      let syllableProbability = syllableResults[i][1];
+      return [word, letterProbability * syllableProbability];
+    });
+    
     // sort probabilities numerically
     results.sort(function(a, b) {
       return b[1] - a[1];
@@ -97,7 +140,10 @@ class Utils {
 
 // basic test case
 console.log("creating markov chain");
-let finder = new MarkovChainEnglishWordFinder(words.map((str) => str.split('')));
+let finder = new MarkovChainSyllablesEnglishWordFinder(
+  words.map((str) => str.split('')),
+  words.map((str) => metaphone.process(str).split(''))
+);
 Utils.printResults(finder.findLikelyEnglishWords("2768437"));
 
 // random test cases
