@@ -1,12 +1,15 @@
+console.log('loading markov chains library');
 const englishWordsFinder = require('./englishWords.js');
-const MarkovChainSyllablesEnglishWordFinder = englishWordsFinder.MarkovChainSyllablesEnglishWordFinder;
+const MarkovChainEnglishWordFinder = englishWordsFinder.MarkovChainEnglishWordFinder;
 const Utils = englishWordsFinder.Utils;
+
 console.log('loading natural language processing library');
 let natural = require('natural'),
     metaphone = natural.Metaphone;
+
 console.log('loading english words library');
 let words = require('an-array-of-english-words');
-console.log('loading markov chains library');
+
 let readline = require('readline');
 let rl = readline.createInterface({
   input: process.stdin,
@@ -16,10 +19,10 @@ let rl = readline.createInterface({
 
 // basic test case
 console.log('creating markov chain');
-let finder = new MarkovChainSyllablesEnglishWordFinder(
-  words.map((str) => str.split('')),
-  words.map((str) => metaphone.process(str).split(''))
-);
+let finder = new MarkovChainEnglishWordFinder([
+  {corpus: words.map((str) => str.split('')), stateSize: 2},
+  {corpus: words.map((str) => metaphone.process(str).split('')), stateSize: 1, wordTransform: metaphone.process}
+]);
 const testNumber = '2768437';
 const testString = 'brother';
 console.log(`finding possible words for ${testNumber} which matches ${testString}`);

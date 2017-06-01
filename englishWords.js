@@ -1,6 +1,3 @@
-let natural = require('natural'),
-    metaphone = natural.Metaphone, soundEx = natural.SoundEx;
-let words = require('an-array-of-english-words');
 let Chain = require('./lib/markov-chains.js').default;
 
 class MarkovChainEnglishWordFinder {
@@ -11,9 +8,16 @@ class MarkovChainEnglishWordFinder {
    * @param {function} wordTransform how to transform possible words to match the corpus
    * @param {number} stateSize the size of states to build the Markov chain
    */
-  constructor(corpus, wordTransform, stateSize = 2) {
-    this.wordTransform = wordTransform;
-    this.chain = new Chain(corpus, {stateSize});
+  constructor(array) {
+    // TODO assert arrray is an array
+    // assert that the array is at least length 1
+    this.chains = [];
+    for (const {corpus, stateSize = 1, wordTransform} of array) {
+      // assert it has corpus
+      const chain = new Chain(corpus, stateSize);
+      chain.wordTransform = wordTransform;
+      this.chains.push(chain);
+    }
   }
   
   
@@ -23,62 +27,34 @@ class MarkovChainEnglishWordFinder {
    * @param {string} number number
    */
   findLikelyEnglishWords(number, numberOfResults = 10) {
-    let results = Utils.generateNumberWords(number).map(word => {
-      let transformedWord = word;
-      if (typeof wordTransform === 'function') {
-        transformedWord = wordTransform(word);
-      }
-
-      return [
-        word,
-        this.chain.likelihoodOf(
-          transformedWord.split(''),
-          { includeBeginState: true, includeEndState: true }
-        )
-      ];
-    });
-    // sort probabilities numerically
-    results.sort(function(a, b) {
-      return b[1] - a[1];
-    });
-    
-    // return top `numberOfResults` results
-    return results.slice(0, numberOfResults);
-  }
-}
-
-class MarkovChainSyllablesEnglishWordFinder {
-  constructor(corpus, syllableCorpus, { lettersStateSize = 2, syllablesStateSize = 1} = { lettersStateSize: 2, syllablesStateSize: 1}) {
-    this.wordChain = new Chain(corpus, {lettersStateSize});
-    this.syllableChain = new Chain(syllableCorpus, {syllablesStateSize});
-  }
-  
-  findLikelyEnglishWords(number, numberOfResults = 10) {
     let numberWords = Utils.generateNumberWords(number);
-    let letterResults = numberWords.map(word => {
-      return [
-        word,
-        this.wordChain.likelihoodOf(
-          word.split(''),
-          { includeBeginState: true, includeEndState: true }
-        )
-      ];
-    });
     
-    let syllableResults = numberWords.map(word => {
-      return [
-        word,
-        this.syllableChain.likelihoodOf(
-          metaphone.process(word).split(''),
-          { includeBeginState: true, includeEndState: true }
-        )
-      ];
-    });
+    let chainResults = [];
+    for (const chain of this.chains) {
+      let cResults = numberWords.map(word => {
+        let transformedWord = word;
+        if (typeof chain.wordTransform === 'function') {
+          transformedWord = chain.wordTransform(word);
+        }
+
+        return [
+          word,
+          chain.likelihoodOf(
+            transformedWord.split(''),
+            { includeBeginState: true, includeEndState: true }
+          )
+        ];
+      });
+      
+      chainResults.push(cResults);
+    }
     
-    let results = letterResults.map (([word, letterProbability], i) => {
-      let syllableProbability = syllableResults[i][1];
-      return [word, letterProbability * syllableProbability];
-    });
+    // combine probabilities from each chain
+    let results = chainResults.slice(1).reduce((results, cResults) => {
+      return results.map(([word, probability], i) => {
+        return [word, probability * cResults[i][1]];
+      });
+    }, chainResults[0]);
     
     // sort probabilities numerically
     results.sort(function(a, b) {
@@ -140,6 +116,5 @@ class Utils {
 
 module.exports = {
   MarkovChainEnglishWordFinder,
-  MarkovChainSyllablesEnglishWordFinder,
   Utils
 };
