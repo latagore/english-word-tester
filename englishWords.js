@@ -9,20 +9,22 @@ const letters = ['ABC', 'DEF', 'GHI', 'JKL', 'MNO', 'PRS', 'TUV', 'WXY'];
 
 class MarkovChainEnglishWordFinder {
   constructor(corpus, wordTransform) {
-    // don't apply any transforms if 
-    this.wordTransform = wordTransform || (x => x);
-    //this.chain = new Chain(corpus, {stateSize: 3});
+    // don't apply any transforms if wordtr
+    this.wordTransform = wordTransform;
+    this.chain = new Chain(corpus, {stateSize: 3});
   }
   
   findLikelyEnglishWords(number, numberOfResults = 10) {
-    console.log(Utils.generateNumberWords(number).length);
     let results = Utils.generateNumberWords(number).map(word => {
-      [
-        this.wordTransform(word),
+      let transformedWord = word;
+      if (typeof wordTransform === 'function') {
+        transformedWord = wordTransform(word);
+      }
+      return [
+        transformedWord,
         this.chain.likelihoodOf(word.split(''))
-      ]
+      ];
     });
-    
     // sort probabilities numerically
     results.sort(function(a, b) {
       return b[1] - a[1];
