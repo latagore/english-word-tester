@@ -15,7 +15,7 @@ class MarkovChainEnglishWordFinder {
   constructor(corpus, wordTransform) {
     // don't apply any transforms if wordtr
     this.wordTransform = wordTransform;
-    this.chain = new Chain(corpus, {stateSize: 3});
+    this.chain = new Chain(corpus, {stateSize: 2});
   }
   
   findLikelyEnglishWords(number, numberOfResults = 10) {
@@ -29,7 +29,7 @@ class MarkovChainEnglishWordFinder {
         transformedWord,
         this.chain.likelihoodOf(
           word.split(''),
-          { includeBeginState: false, includeEndState: false}
+          { includeBeginState: true, includeEndState: true }
         )
       ];
     });
