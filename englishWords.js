@@ -3,7 +3,6 @@ let natural = require('natural'),
 console.log("loading english words");
 let words = require("an-array-of-english-words");
 let Chain = require('../markov-chains/dist/markov-chains.js').default;
-
 let readline = require('readline');
 let rl = readline.createInterface({
   input: process.stdin,
@@ -11,8 +10,6 @@ let rl = readline.createInterface({
   terminal: false
 });
 
-
-const letters = ['ABC', 'DEF', 'GHI', 'JKL', 'MNO', 'PRS', 'TUV', 'WXY'];
 
 class MarkovChainEnglishWordFinder {
   constructor(corpus, wordTransform) {
@@ -43,6 +40,9 @@ class MarkovChainEnglishWordFinder {
 }
 
 const PROBABILITY_PRECISION = 3;
+const letters = ['abc', 'def', 'ghi', 'jkl', 'mno', 'prs', 'tuv', 'wxy']
+  .map(x => x.split('')); // create an array of arrays of characters
+const DIGITS_PER_NUMBER = 3;
 class Utils {
   static printResults(results) {
     results.forEach(r => {
@@ -55,22 +55,26 @@ class Utils {
   static generateNumberWords(number) {
     number = number + "";
     if (!number.match(/[2-9]+/)) {
-      throw new Error(`Invalid number: ${number} must be a number with only digits between 2 and 9.`)
+      throw new Error(`Invalid number: ${number} must be a number with only digits between 2 and 9.`);
     }
     
     let results = [];
-    for (let iteration = 0; iteration < 2187; iteration++) {
+    for (let iteration = 0; iteration < Math.pow(DIGITS_PER_NUMBER, number.length); iteration++) {
       let word = "";
       let counter = iteration;
-      // calculate an index for the 8 keys
+      // generate a word based on the counter
       for (let i = 0; i < 7; i++) {
-        word += letters[number.charAt(i) - 2].charAt(counter % 3);
+        word += Utils.getPossibleLettersForDigit(number.charAt(i))[counter % 3];
         counter = Math.floor(counter / 3);
       }
 
       results.push(word.toLowerCase());
     }
     return results;
+  }
+  
+  static getPossibleLettersForDigit(digit) {
+    return letters[digit - 2];
   }
   
   static createRandomNumber() {
