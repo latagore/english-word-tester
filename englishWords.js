@@ -1,12 +1,7 @@
 let natural = require('natural'),
     metaphone = natural.Metaphone, soundEx = natural.SoundEx;
 console.log("loading english words");
-//let words = require("an-array-of-english-words");
-var CommonWords = require("common-english-words");
- 
-CommonWords.getWords(function(err, w){
-let words = w;
-
+let words = require("an-array-of-english-words");
 let Chain = require('../markov-chains/dist/markov-chains.js').default;
 let readline = require('readline');
 let rl = readline.createInterface({
@@ -156,5 +151,4 @@ rl.on('line', function(line){
   Utils.printResults(results);
     
   console.log('Press enter to try another number or Ctrl C to quit');
-});
 });
