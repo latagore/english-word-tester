@@ -4,6 +4,13 @@ console.log("loading english words");
 let words = require("an-array-of-english-words");
 let Chain = require('../markov-chains/dist/markov-chains.js').default;
 
+let readline = require('readline');
+let rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout,
+  terminal: false
+});
+
 
 const letters = ['ABC', 'DEF', 'GHI', 'JKL', 'MNO', 'PRS', 'TUV', 'WXY'];
 
@@ -72,13 +79,13 @@ let finder = new MarkovChainEnglishWordFinder(words.map((str) => str.split('')))
 Utils.printResults(finder.findLikelyEnglishWords("2768437"));
 
 // random test cases
-for (let i = 0; i < 20; i++) {
-  let string = "";
-  for (let j = 0; j < 7; j++) {
-    string += Math.floor(Math.random()*7) + 2 + "";
-  }
+console.log('Press enter to try another number or Ctrl C to quit');
+rl.on('line', function(line){
+  let string = Utils.createRandomNumber();
   
   console.log(`finding possible words for ${string}`);
   let results = finder.findLikelyEnglishWords(string);
   Utils.printResults(results);
-}
+    
+  console.log('Press enter to try another number or Ctrl C to quit');
+});
