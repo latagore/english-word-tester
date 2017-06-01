@@ -4,11 +4,24 @@ let words = require('an-array-of-english-words');
 let Chain = require('./lib/markov-chains.js').default;
 
 class MarkovChainEnglishWordFinder {
+  /**
+   * Creates a new finder using a Markov chain built with the `corpus`.
+   *
+   * @param {Array} corpus an array of arrays of data
+   * @param {function} wordTransform how to transform possible words to match the corpus
+   * @param {number} stateSize the size of states to build the Markov chain
+   */
   constructor(corpus, wordTransform, stateSize = 2) {
     this.wordTransform = wordTransform;
     this.chain = new Chain(corpus, {stateSize});
   }
   
+  
+  /** 
+   * Returns the most likely words that look like the `corpus`.
+   * 
+   * @param {string} number number
+   */
   findLikelyEnglishWords(number, numberOfResults = 10) {
     let results = Utils.generateNumberWords(number).map(word => {
       let transformedWord = word;
