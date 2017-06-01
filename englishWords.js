@@ -72,6 +72,14 @@ class Utils {
     }
     return results;
   }
+  
+  static createRandomNumber() {
+    let string = "";
+    for (let j = 0; j < 7; j++) {
+      string += Math.floor(Math.random()*7) + 2 + "";
+    }
+    return string;
+  }
 }
 
 // basic test case
