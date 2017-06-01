@@ -1,8 +1,10 @@
+console.log('loading natural language processing library');
 let natural = require('natural'),
     metaphone = natural.Metaphone, soundEx = natural.SoundEx;
-console.log("loading english words");
-let words = require("an-array-of-english-words");
-let Chain = require('../markov-chains/dist/markov-chains.js').default;
+console.log('loading english words library');
+let words = require('an-array-of-english-words');
+console.log('loading markov chains library');
+let Chain = require('./lib/markov-chains.js').default;
 let readline = require('readline');
 let rl = readline.createInterface({
   input: process.stdin,
@@ -95,19 +97,19 @@ class Utils {
     results.forEach(r => {
       console.log(`Word: "${r[0]}", Probability: ${r[1].toExponential(PROBABILITY_PRECISION)}`);
     });
-    console.log("=======");
+    console.log('=======');
     console.log();
   }
   
   static generateNumberWords(number) {
-    number = number + "";
+    number = number + '';
     if (!number.match(/[2-9]+/)) {
       throw new Error(`Invalid number: ${number} must be a number with only digits between 2 and 9.`);
     }
     
     let results = [];
     for (let iteration = 0; iteration < Math.pow(DIGITS_PER_NUMBER, number.length); iteration++) {
-      let word = "";
+      let word = '';
       let counter = iteration;
       // generate a word based on the counter
       for (let i = 0; i < 7; i++) {
@@ -125,21 +127,27 @@ class Utils {
   }
   
   static createRandomNumber() {
-    let string = "";
+    let string = '';
     for (let j = 0; j < 7; j++) {
-      string += Math.floor(Math.random()*7) + 2 + "";
+      string += Math.floor(Math.random()*7) + 2 + '';
     }
     return string;
   }
 }
 
+
+// ======= TESTS ========
+
 // basic test case
-console.log("creating markov chain");
+console.log('creating markov chain');
 let finder = new MarkovChainSyllablesEnglishWordFinder(
   words.map((str) => str.split('')),
   words.map((str) => metaphone.process(str).split(''))
 );
-Utils.printResults(finder.findLikelyEnglishWords("2768437"));
+const testNumber = '2768437';
+const testString = 'brother';
+console.log(`finding possible words for ${testNumber} which matches ${testString}`);
+Utils.printResults(finder.findLikelyEnglishWords(testNumber));
 
 // random test cases
 console.log('Press enter to try another number or Ctrl C to quit');
