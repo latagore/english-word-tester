@@ -42,10 +42,11 @@ class MarkovChainEnglishWordFinder {
   }
 }
 
+const PROBABILITY_PRECISION = 3;
 class Utils {
   static printResults(results) {
     results.forEach(r => {
-      console.log(`Word: "${r[0]}", Probability: ${r[1]}`);
+      console.log(`Word: "${r[0]}", Probability: ${r[1].toExponential(PROBABILITY_PRECISION)}`);
     });
     console.log("=======");
     console.log();
